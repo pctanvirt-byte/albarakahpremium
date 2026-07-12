@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { ProductCard } from '../components/ProductCard';
 import { Search, SlidersHorizontal, ArrowUpDown, Tag, X } from 'lucide-react';
 import { Product } from '../types';
+import { IslamicBorder } from '../components/IslamicPattern';
 
 export const Shop: React.FC = () => {
   const { currentLanguage, products } = useApp();
@@ -24,6 +25,7 @@ export const Shop: React.FC = () => {
     { id: 'attar', label: { bn: 'লাক্সারি আতর', en: 'Luxury Attar' } },
     { id: 'womens', label: { bn: 'মহিলাদের কালেকশন', en: "Women Collection" } },
     { id: 'baby_toys', label: { bn: 'বাচ্চাদের খেলনা', en: 'Baby Toys' } },
+    { id: 'watches', label: { bn: 'হাত ঘড়ি', en: 'Wrist Watches' } },
     { id: 'sunglasses', label: { bn: 'সানগ্লাস', en: 'Sunglasses' } },
     { id: 'accessories', label: { bn: 'এক্সেসরিজ', en: 'Accessories' } },
     { id: 'islamic', label: { bn: 'ইসলামিক সামগ্রী', en: 'Islamic Products' } },
@@ -126,6 +128,8 @@ export const Shop: React.FC = () => {
           </p>
         </div>
 
+        {selectedCategory === 'islamic' && <IslamicBorder className="mb-8" />}
+
         {/* Filters and Layout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8" id="shop-main-layout">
           
@@ -168,13 +172,17 @@ export const Shop: React.FC = () => {
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`w-full text-left px-3 py-2 text-xs rounded transition-all duration-150 flex items-center justify-between ${
                       selectedCategory === cat.id
-                        ? 'bg-amber-500 text-black font-bold'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                        ? cat.id === 'islamic'
+                          ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-500/15'
+                          : 'bg-amber-500 text-black font-bold'
+                        : cat.id === 'islamic'
+                          ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 font-semibold'
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                     }`}
                     id={`sidebar-cat-btn-${cat.id}`}
                   >
                     <span>{cat.label[currentLanguage]}</span>
-                    {selectedCategory === cat.id && <span className="w-1.5 h-1.5 rounded-full bg-black"></span>}
+                    {selectedCategory === cat.id && <span className={`w-1.5 h-1.5 rounded-full ${cat.id === 'islamic' ? 'bg-white' : 'bg-black'}`}></span>}
                   </button>
                 ))}
               </div>
@@ -237,7 +245,11 @@ export const Shop: React.FC = () => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 px-3 py-2 rounded focus:outline-none focus:border-amber-500/50"
+                    className={`w-full bg-zinc-900 border text-xs px-3 py-2 rounded focus:outline-none ${
+                      selectedCategory === 'islamic'
+                        ? 'border-emerald-500/50 text-emerald-400 focus:border-emerald-500'
+                        : 'border-zinc-800 text-zinc-300 focus:border-amber-500/50'
+                    }`}
                     id="mobile-cat-select"
                   >
                     {categories.map((cat) => (

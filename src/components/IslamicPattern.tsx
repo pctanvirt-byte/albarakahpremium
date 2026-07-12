@@ -11,19 +11,28 @@ export const IslamicBorder: React.FC<{ className?: string }> = ({ className = ""
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
-        className="text-amber-500 opacity-60"
+        className="opacity-90"
         id="islamic-border-svg"
       >
+        <defs>
+          <linearGradient id="emerald-gold-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#047857" /> {/* emerald-700 */}
+            <stop offset="30%" stopColor="#10b981" /> {/* emerald-500 */}
+            <stop offset="50%" stopColor="#F5CB4A" /> {/* gold */}
+            <stop offset="70%" stopColor="#10b981" /> {/* emerald-500 */}
+            <stop offset="100%" stopColor="#047857" /> {/* emerald-700 */}
+          </linearGradient>
+        </defs>
         <pattern id="islamic-star-pattern" width="60" height="24" patternUnits="userSpaceOnUse">
           {/* Islamic Star Pattern Unit */}
           <path
             d="M30 0 L36 8 L45 3 L40 12 L49 17 L39 17 L35 24 L30 16 L25 24 L21 17 L11 17 L20 12 L15 3 L24 8 Z"
-            fill="currentColor"
+            fill="url(#emerald-gold-grad)"
             fillRule="evenodd"
-            opacity="0.85"
+            opacity="0.95"
           />
           <circle cx="30" cy="12" r="2" fill="#000000" />
-          <path d="M0 12 H60" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" />
+          <path d="M0 12 H60" stroke="#10b981" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.4" />
         </pattern>
         <rect width="1000" height="24" fill="url(#islamic-star-pattern)" />
       </svg>
@@ -77,42 +86,10 @@ export const IslamicLogo: React.FC<{ size?: number; className?: string }> = ({ s
           </textPath>
         </text>
 
-        {/* Center monogram: Authentic Royal Arabic Calligraphy for "Al Barakah" (البركة) - Completely redesigned to avoid S-like shapes */}
-        <g stroke="url(#gold-grad)" strokeLinecap="round" strokeLinejoin="round" fill="none">
-          {/* Symmetrical Alif & Lam (majestic tall vertical lines) */}
-          <path d="M 36 26 L 36 54" strokeWidth="2.5" />
-          <path d="M 42 24 L 42 54" strokeWidth="2.5" />
-          
-          {/* Main baseline sweep connecting the letters elegantly */}
-          <path d="M 31 54 L 63 54" strokeWidth="2.5" />
-          
-          {/* Left hook for Ba */}
-          <path d="M 31 49 L 31 54" strokeWidth="2.5" />
-          
-          {/* Kaf vertical shaft & elegant top diagonal kashida stroke */}
-          <path d="M 48 24 L 48 54" strokeWidth="2.5" />
-          <path d="M 48 32 Q 55 28 62 23" strokeWidth="2.25" />
-          
-          {/* Ta-Marbutah (beautiful circular loop representing the final letter) */}
-          <path d="M 54 54 C 54 44, 60 44, 60 54 Z" strokeWidth="2.25" />
-          
-          {/* Elegant sweeping crescent tail for Ra */}
-          <path d="M 60 54 Q 66 54 68 62" strokeWidth="2.5" />
-          
-          {/* Royal crowning minaret point in the absolute center top */}
-          <path d="M 47 18 L 50 12 L 53 18 Z" fill="url(#gold-grad)" stroke="none" />
-          
-          {/* Authentic diacritical dots (Nuqta) */}
-          {/* Ba dot (single dot underneath) */}
-          <rect x="34" y="60" width="3.5" height="3.5" fill="url(#gold-grad)" stroke="none" transform="rotate(45 35.75 61.75)" />
-          
-          {/* Ta-Marbutah double dots (two dots placed elegantly on top of the loop) */}
-          <rect x="54" y="38" width="2.5" height="2.5" fill="url(#gold-grad)" stroke="none" transform="rotate(45 55.25 39.25)" />
-          <rect x="59" y="38" width="2.5" height="2.5" fill="url(#gold-grad)" stroke="none" transform="rotate(45 60.25 39.25)" />
-          
-          {/* Calligraphic Tashkeel / Harakat (Fatha and Shadda) for supreme royal look */}
-          <path d="M 37 18 L 42 14" strokeWidth="1.5" />
-          <path d="M 44 20 C 45 18, 47 18, 47 20 C 47 22, 49 22, 49 20" strokeWidth="1.25" />
+        {/* Center monogram: Clean space inside the geometric frame */}
+        <g fill="url(#gold-grad)" stroke="none">
+          {/* A small elegant gold 8-pointed star accent at the absolute center */}
+          <path d="M 50 45 L 51.5 48.5 L 55 50 L 51.5 51.5 L 50 55 L 48.5 51.5 L 45 50 L 48.5 48.5 Z" />
         </g>
       </svg>
     </div>

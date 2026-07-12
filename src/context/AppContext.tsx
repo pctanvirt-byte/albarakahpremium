@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Product, CartItem, Order, User, Language, OrderItem } from '../types';
 import { initialProducts } from '../data/initialProducts';
 import { onAuthStateChanged } from 'firebase/auth';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { 
   auth, 
+  db,
   loginWithGoogle, 
   logoutFromFirebase, 
   syncUserProfile, 
@@ -12,7 +14,8 @@ import {
   fetchAllOrdersFromFirestore,
   syncProductsToFirestore,
   saveProductToFirestore,
-  deleteProductFromFirestore
+  deleteProductFromFirestore,
+  deleteOrderFromFirestore
 } from '../lib/firebase';
 
 interface AppContextType {
@@ -26,6 +29,8 @@ interface AppContextType {
   currentPage: string;
   selectedProduct: Product | null;
   adminLoggedIn: boolean;
+  newOrderNotification: Order | null;
+  setNewOrderNotification: (order: Order | null) => void;
   
   // Products Management
   addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviewsCount'>) => void;
@@ -117,6 +122,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [adminLoggedIn, setAdminLoggedIn] = useState<boolean>(() => {
     return sessionStorage.getItem('al_barakah_admin') === 'true';
   });
+
+  const [newOrderNotification, setNewOrderNotification] = useState<Order | null>(null);
+
+  // Real-time order listener for admin
+  useEffect(() => {
+    if (!adminLoggedIn) return;
+
+    console.log("Admin logged in. Subscribing to real-time orders...");
+    const ordersCol = collection(db, "orders");
+    const q = query(ordersCol, orderBy("createdAt", "desc"));
+    
+    let isInitial = true;
+
+    const playChime = () => {
+      try {
+        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav");
+        audio.volume = 0.45;
+        audio.play();
+      } catch (e) {
+        console.log("Audio autoplay blocked or failed", e);
+      }
+    };
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ordersList: Order[] = [];
+      const newOrders: Order[] = [];
+
+      snapshot.forEach((doc) => {
+        ordersList.push(doc.data() as Order);
+      });
+
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const orderData = change.doc.data() as Order;
+          // Verify it's recent (created in the last 10 minutes) and not part of the initial load
+          const isRecent = Date.now() - new Date(orderData.createdAt).getTime() < 600000;
+          if (!isInitial && isRecent) {
+            newOrders.push(orderData);
+          }
+        }
+      });
+
+      // Update local state and sync with Firestore changes
+      setOrders(ordersList);
+
+      if (newOrders.length > 0) {
+        // Show the latest new order notification
+        const latest = newOrders[0];
+        setNewOrderNotification(latest);
+        playChime();
+      }
+
+      isInitial = false;
+    }, (error) => {
+      console.error("Error listening to real-time orders snapshot:", error);
+    });
+
+    return () => unsubscribe();
+  }, [adminLoggedIn]);
 
   // Listen to Firebase Auth changes to auto-login
   useEffect(() => {
@@ -490,7 +554,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateOrderStatus = (orderId: string, status: Order['status']) => {
     setOrders((prev) =>
-      prev.map((ord) => (ord.id === orderId ? { ...ord, status } : ord))
+      prev.map((ord) => {
+        if (ord.id === orderId) {
+          const updated = { ...ord, status };
+          saveOrderToFirestore(updated);
+          return updated;
+        }
+        return ord;
+      })
     );
   };
 
@@ -503,16 +574,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id === orderId) {
+          let updated: Order;
           if (courier === 'none') {
             const { courier: _, courierTrackingId: __, courierStatus: ___, ...rest } = ord;
-            return rest as Order;
+            updated = rest as Order;
+          } else {
+            updated = {
+              ...ord,
+              courier,
+              courierTrackingId: trackingId,
+              courierStatus: courierStatus || 'Consignment Created'
+            } as Order;
           }
-          return {
-            ...ord,
-            courier,
-            courierTrackingId: trackingId,
-            courierStatus: courierStatus || 'Consignment Created'
-          } as Order;
+          saveOrderToFirestore(updated);
+          return updated;
         }
         return ord;
       })
@@ -521,6 +596,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteOrder = (orderId: string) => {
     setOrders((prev) => prev.filter((ord) => ord.id !== orderId));
+    deleteOrderFromFirestore(orderId);
   };
 
   const deleteUser = (userId: string) => {
@@ -561,6 +637,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentPage,
         selectedProduct,
         adminLoggedIn,
+        newOrderNotification,
+        setNewOrderNotification,
         
         addProduct,
         updateProduct,

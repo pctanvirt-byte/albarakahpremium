@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 import { 
-  Sparkles, 
   MessageSquare, 
   Image as ImageIcon, 
   Video, 
@@ -202,6 +201,7 @@ export const AIScentStudio: React.FC = () => {
   const [artSize, setArtSize] = useState<"1K" | "2K" | "4K">("1K");
   const [artAspectRatio, setArtAspectRatio] = useState("1:1");
   const [artResult, setArtResult] = useState("");
+  const [artError, setArtError] = useState("");
   const [isArtLoading, setIsArtLoading] = useState(false);
 
   const handleGenerateArt = async () => {
@@ -209,6 +209,7 @@ export const AIScentStudio: React.FC = () => {
 
     setIsArtLoading(true);
     setArtResult("");
+    setArtError("");
 
     try {
       const response = await fetch("/api/gemini/generate-image", {
@@ -229,7 +230,7 @@ export const AIScentStudio: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      alert(`Error generating image: ${err.message}`);
+      setArtError(err.message || "Failed to generate image.");
     } finally {
       setIsArtLoading(false);
     }
@@ -369,7 +370,6 @@ export const AIScentStudio: React.FC = () => {
           <div className="flex items-center justify-center gap-2">
             <span className="h-[1px] w-8 bg-amber-500/40"></span>
             <div className="bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full flex items-center gap-1.5 text-amber-500 text-[10px] font-bold uppercase tracking-widest">
-              <Sparkles size={12} className="animate-pulse" />
               {currentLanguage === "bn" ? "এআই আর্ট ও ফ্র্যাগ্রেন্স হাব" : "AI Scent & Modesty Laboratory"}
             </div>
             <span className="h-[1px] w-8 bg-amber-500/40"></span>
@@ -810,7 +810,6 @@ export const AIScentStudio: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Sparkles size={13} />
                     <span>{currentLanguage === "bn" ? "আর্ট জেনারেট করুন" : "Generate Custom Art"}</span>
                   </>
                 )}
@@ -827,7 +826,12 @@ export const AIScentStudio: React.FC = () => {
                   </span>
                 </div>
 
-                {artResult ? (
+                {artError ? (
+                  <div className="text-center py-20 text-rose-500 text-xs font-sans space-y-2">
+                    <p className="font-bold">{currentLanguage === "bn" ? "আর্ট জেনারেশন ব্যর্থ হয়েছে" : "Art Generation Failed"}</p>
+                    <p className="text-zinc-400 text-[11px] leading-relaxed max-w-sm mx-auto">{artError}</p>
+                  </div>
+                ) : artResult ? (
                   <div className="space-y-4 flex flex-col items-center">
                     <div className="border border-zinc-900 rounded overflow-hidden shadow-2xl shadow-black max-h-[280px] flex items-center justify-center bg-black">
                       <img src={artResult} alt="Generated Scent Artwork" className="object-contain max-h-[270px]" />

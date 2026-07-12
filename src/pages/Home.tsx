@@ -55,6 +55,12 @@ export const Home: React.FC = () => {
       image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=400'
     },
     {
+      id: 'watches',
+      title: { bn: 'প্রিমিয়াম হাত ঘড়ি', en: 'Premium Watches' },
+      tagline: { bn: 'রয়্যাল আভিজাত্যপূর্ণ ও নিখুঁত ঘড়ি কালেকশন', en: 'Royal & Elegant Wrist Watches' },
+      image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=400'
+    },
+    {
       id: 'womens',
       title: { bn: 'মহিলাদের কালেকশন', en: "Women Collection" },
       tagline: { bn: 'আবায়া, হিজাব ও মডেস্টি ফ্যাশন', en: 'Premium Dubai Abaya & Chiffon Hijabs' },
@@ -209,37 +215,55 @@ export const Home: React.FC = () => {
           <div className="w-16 h-0.5 bg-amber-500 mx-auto mt-4 rounded"></div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="categories-grid">
-          {categories.map((cat, idx) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.1 }}
-              onClick={() => handleCategoryClick(cat.id)}
-              className="group relative h-72 rounded-lg overflow-hidden border border-zinc-900 hover:border-amber-500/40 cursor-pointer shadow-lg shadow-black/80"
-              id={`cat-card-${cat.id}`}
-            >
-              <img
-                src={cat.image}
-                alt={cat.title[currentLanguage]}
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-70"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-5 flex flex-col justify-end">
-                <h3 className="text-white font-serif font-bold text-lg group-hover:text-amber-500 transition-colors">
-                  {cat.title[currentLanguage]}
-                </h3>
-                <p className="text-zinc-400 text-xs mt-1 font-medium">
-                  {cat.tagline[currentLanguage]}
-                </p>
-                <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-amber-500 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {currentLanguage === 'bn' ? 'পণ্য দেখুন' : 'View Products'} <ChevronRight size={10} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8" id="categories-grid">
+          {categories.map((cat, idx) => {
+            const isIslamic = cat.id === 'islamic';
+            return (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                onClick={() => handleCategoryClick(cat.id)}
+                className="group flex flex-col items-center cursor-pointer"
+                id={`cat-card-${cat.id}`}
+              >
+                {/* Image Container styled like the soft-rounded luxury cards in the picture */}
+                <div className={`w-full aspect-square rounded-[2rem] bg-zinc-900/60 border p-1 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-lg relative ${
+                  isIslamic 
+                    ? 'border-emerald-500/25 group-hover:border-emerald-500/55 group-hover:shadow-emerald-500/10 group-hover:bg-emerald-950/20' 
+                    : 'border-zinc-800/80 group-hover:border-amber-500/35 group-hover:shadow-amber-500/5 group-hover:bg-zinc-900/90'
+                }`}>
+                  <img
+                    src={cat.image}
+                    alt={cat.title[currentLanguage]}
+                    className="w-full h-full object-cover rounded-[1.85rem] transition-transform duration-500 ease-out group-hover:scale-105 opacity-85 group-hover:opacity-100"
+                    referrerPolicy="no-referrer"
+                  />
+                  {isIslamic && (
+                    <span className="absolute top-3.5 right-3.5 bg-emerald-600/95 text-white text-[8px] font-bold tracking-widest px-2 py-0.5 rounded-full border border-emerald-400/40 z-10 shadow-lg shadow-black/80">
+                      {currentLanguage === "bn" ? "পবিত্র" : "SACRED"}
+                    </span>
+                  )}
                 </div>
-              </div>
-            </motion.div>
-          ))}
+                
+                {/* Label underneath, matching the clean centered title/price styling */}
+                <div className="mt-4 text-center px-1">
+                  <h3 className={`font-serif font-bold text-sm sm:text-base transition-colors tracking-wide leading-tight ${
+                    isIslamic 
+                      ? 'text-emerald-400 group-hover:text-emerald-300' 
+                      : 'text-zinc-100 group-hover:text-amber-500'
+                  }`}>
+                    {cat.title[currentLanguage]}
+                  </h3>
+                  <p className="text-zinc-500 text-[11px] mt-1 line-clamp-1 font-medium font-sans">
+                    {cat.tagline[currentLanguage]}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 

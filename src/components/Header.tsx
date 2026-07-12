@@ -28,7 +28,8 @@ export const Header: React.FC = () => {
     logoutUser,
     products,
     setSelectedProduct,
-    adminLoggedIn
+    adminLoggedIn,
+    orders
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -86,8 +87,7 @@ export const Header: React.FC = () => {
   const navItems = [
     { id: 'home', label: { bn: 'হোম', en: 'Home' } },
     { id: 'shop', label: { bn: 'শপ / প্রোডাক্টস', en: 'Shop' } },
-    { id: 'ai-studio', label: { bn: 'এআই স্টুডিও ✨', en: 'AI Studio ✨' } },
-    { id: 'gmail', label: { bn: 'জিমেইল সেন্টার', en: 'Gmail Center' } },
+    { id: 'ai-studio', label: { bn: 'এআই স্টুডিও', en: 'AI Studio' } },
     { id: 'about', label: { bn: 'আমাদের সম্পর্কে', en: 'About Us' } },
     { id: 'contact', label: { bn: 'যোগাযোগ', en: 'Contact' } },
     { id: 'privacy', label: { bn: 'প্রাইভেসি পলিসি', en: 'Privacy Policy' } },
@@ -131,24 +131,30 @@ export const Header: React.FC = () => {
                 {item.label[currentLanguage]}
               </button>
             ))}
-            <button
-              onClick={() => setCurrentPage('admin')}
-              className={`px-4 py-2 text-sm font-semibold tracking-wide flex items-center gap-1.5 transition-colors border rounded ${
-                currentPage === 'admin' 
-                  ? 'text-amber-500 bg-amber-500/20 border-amber-500' 
-                  : adminLoggedIn
-                    ? 'text-amber-500 border-amber-500/25 bg-amber-500/5 hover:bg-amber-500/10'
-                    : 'text-zinc-400 border-zinc-900 hover:text-amber-500 hover:border-amber-500/35 hover:bg-zinc-900/10'
-              }`}
-              id="nav-item-admin-shortcut"
-            >
-              {adminLoggedIn ? <ShieldAlert size={14} className="text-amber-500" /> : <Lock size={13} className="text-zinc-500" />}
-              <span>
-                {adminLoggedIn 
-                  ? (currentLanguage === 'bn' ? 'অ্যাডমিন' : 'Admin') 
-                  : (currentLanguage === 'bn' ? 'অ্যাডমিন লগইন' : 'Admin Login')}
-              </span>
-            </button>
+            {adminLoggedIn && (() => {
+              const pendingCount = orders.filter(o => o.status === 'pending').length;
+              return (
+                <button
+                  onClick={() => setCurrentPage('admin')}
+                  className={`px-4 py-2 text-sm font-semibold tracking-wide flex items-center gap-2 transition-all border rounded relative ${
+                    currentPage === 'admin' 
+                      ? 'text-amber-500 bg-amber-500/20 border-amber-500' 
+                      : 'text-amber-500 border-amber-500/25 bg-amber-500/5 hover:bg-amber-500/10'
+                  }`}
+                  id="nav-item-admin-shortcut"
+                >
+                  <ShieldAlert size={14} className="text-amber-500" />
+                  <span className="flex items-center gap-1.5">
+                    <span>{currentLanguage === 'bn' ? 'অ্যাডমিন' : 'Admin'}</span>
+                    {pendingCount > 0 && (
+                      <span className="flex h-4 min-w-4 px-1.5 items-center justify-center rounded-full bg-rose-600 text-[9px] font-bold text-white shadow-[0_0_8px_rgba(225,29,72,0.6)] animate-pulse">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })()}
           </nav>
 
           {/* Search, Cart, User controls */}
@@ -403,27 +409,35 @@ export const Header: React.FC = () => {
                   {currentLanguage === 'bn' ? `পছন্দের তালিকা (${wishlist.length})` : `My Wishlist (${wishlist.length})`}
                 </span>
               </button>
-              <button
-                onClick={() => {
-                  setCurrentPage('admin');
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full text-left px-4 py-3 text-sm font-bold rounded flex items-center gap-2 border ${
-                  currentPage === 'admin'
-                    ? 'text-amber-500 bg-amber-500/10 border-amber-500'
-                    : adminLoggedIn
-                      ? 'text-amber-500 bg-amber-500/5 border-amber-500/10 hover:bg-amber-500/15'
-                      : 'text-zinc-400 bg-zinc-900/30 border-zinc-900/60 hover:text-amber-500 hover:border-amber-500/20'
-                }`}
-                id="mobile-nav-item-admin"
-              >
-                {adminLoggedIn ? <ShieldAlert size={14} className="text-amber-500" /> : <Lock size={13} className="text-zinc-500" />}
-                <span>
-                  {adminLoggedIn 
-                    ? (currentLanguage === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin Dashboard') 
-                    : (currentLanguage === 'bn' ? 'অ্যাডমিন লগইন' : 'Admin Login')}
-                </span>
-              </button>
+              {adminLoggedIn && (() => {
+                const pendingCount = orders.filter(o => o.status === 'pending').length;
+                return (
+                  <button
+                    onClick={() => {
+                      setCurrentPage('admin');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 text-sm font-bold rounded flex items-center justify-between border ${
+                      currentPage === 'admin'
+                        ? 'text-amber-500 bg-amber-500/10 border-amber-500'
+                        : 'text-amber-500 bg-amber-500/5 border-amber-500/10 hover:bg-amber-500/15'
+                    }`}
+                    id="mobile-nav-item-admin"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShieldAlert size={14} className="text-amber-500" />
+                      <span>
+                        {currentLanguage === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin Dashboard'}
+                      </span>
+                    </div>
+                    {pendingCount > 0 && (
+                      <span className="flex h-4 min-w-4 px-1.5 items-center justify-center rounded-full bg-rose-600 text-[9px] font-bold text-white shadow-[0_0_8px_rgba(225,29,72,0.6)]">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })()}
               {currentUser && (
                 <div className="pt-4 border-t border-zinc-900 flex items-center justify-between px-4">
                   <span className="text-xs text-zinc-400 font-medium">

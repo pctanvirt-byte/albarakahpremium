@@ -4,7 +4,6 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Modality, ThinkingLevel, GenerateVideosOperation } from "@google/genai";
 import dotenv from "dotenv";
-import fetch from "node-fetch"; // Node 18+ has global fetch, but fallback to importing or standard global fetch
 
 dotenv.config();
 
@@ -139,7 +138,7 @@ async function startServer() {
       };
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview", // Use premium pro model for image understanding
+        model: "gemini-3.5-flash", // Use standard multimodal flash model for fast and robust image understanding
         contents: { parts: [imagePart, textPart] },
         config: {
           systemInstruction: "You are the Vision Expert at Al Barakah Premium. Analyze photos uploaded by users (such as raw flowers, spices, style references, sunglasses, or bottles) and explain their scent profile or style mood, then link them back to luxury Islamic attire, attars, or accessories.",
@@ -165,8 +164,8 @@ async function startServer() {
         return res.status(400).json({ error: "Prompt is required." });
       }
 
-      // For premium high-quality image, use 'gemini-3-pro-image-preview' as requested, or fallback to 'gemini-3-pro-image' / 'gemini-3.1-flash-image'
-      const selectedModel = "gemini-3-pro-image-preview";
+      // For premium high-quality image, use 'gemini-3.1-flash-image'
+      const selectedModel = "gemini-3.1-flash-image";
 
       const response = await ai.models.generateContent({
         model: selectedModel,
@@ -229,7 +228,7 @@ async function startServer() {
 
       // Set up parameters for generateVideos
       const generationParams: any = {
-        model: "veo-3.1-fast-generate-preview", // Specified model
+        model: "veo-3.1-lite-generate-preview", // Specified model
         prompt: prompt,
         config: videoConfig,
       };
@@ -311,8 +310,21 @@ async function startServer() {
       }
 
       res.setHeader("Content-Type", "video/mp4");
-      // Pipe node-fetch body stream directly to express response
-      videoRes.body.pipe(res);
+      // Pipe native fetch Web Stream directly to Express response
+      await videoRes.body!.pipeTo(
+        new WritableStream({
+          write(chunk) {
+            res.write(chunk);
+          },
+          close() {
+            res.end();
+          },
+          abort(err) {
+            console.error("Stream aborted:", err);
+            res.end();
+          }
+        })
+      );
     } catch (error: any) {
       console.error("Video Download API Error:", error);
       res.status(500).json({ error: error.message || "Failed to download and stream video." });

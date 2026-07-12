@@ -95,7 +95,7 @@ export const AdminDashboard: React.FC = () => {
   const [pDescBn, setPDescBn] = useState('');
   const [pPrice, setPPrice] = useState('');
   const [pDiscountPrice, setPDiscountPrice] = useState('');
-  const [pCategory, setPCategory] = useState<'attar' | 'sunglasses' | 'accessories' | 'islamic'>('attar');
+  const [pCategory, setPCategory] = useState<Product['category']>('attar');
   const [pStock, setPStock] = useState('');
   const [pImages, setPImages] = useState(''); // comma-separated URLs
   const [pDiscountBadge, setPDiscountBadge] = useState('');
@@ -1092,6 +1092,7 @@ export const AdminDashboard: React.FC = () => {
                     <option value="attar">Attar</option>
                     <option value="womens">Women Collection</option>
                     <option value="baby_toys">Baby Toys</option>
+                    <option value="watches">Wrist Watches</option>
                     <option value="sunglasses">Sunglasses</option>
                     <option value="accessories">Accessories</option>
                     <option value="islamic">Islamic Products</option>

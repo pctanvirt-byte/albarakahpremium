@@ -12,7 +12,7 @@ export interface Product {
   price: number;
   discountPrice?: number;
   images: string[];
-  category: 'attar' | 'sunglasses' | 'accessories' | 'islamic' | 'womens' | 'baby_toys' | 'organic_fruits' | 'medicine';
+  category: 'attar' | 'sunglasses' | 'accessories' | 'islamic' | 'womens' | 'baby_toys' | 'organic_fruits' | 'medicine' | 'watches';
   stock: number;
   rating: number;
   reviewsCount: number;

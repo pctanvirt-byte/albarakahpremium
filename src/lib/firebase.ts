@@ -158,8 +158,20 @@ export const syncProductsToFirestore = async (fallbackProducts: any[]) => {
         await setDoc(productRef, p);
       }
       return fallbackProducts;
+    } else {
+      // Seed any missing fallback products (to support newly added category items)
+      const updatedList = [...productsInDB];
+      for (const p of fallbackProducts) {
+        const exists = productsInDB.some(dbP => dbP.id === p.id);
+        if (!exists) {
+          console.log(`Seeding missing product ${p.id} into Firestore...`);
+          const productRef = doc(db, "products", p.id);
+          await setDoc(productRef, p);
+          updatedList.push(p);
+        }
+      }
+      return updatedList;
     }
-    return productsInDB;
   } catch (error) {
     console.error("Failed to sync products to Firestore:", error);
     return fallbackProducts;
@@ -185,3 +197,14 @@ export const deleteProductFromFirestore = async (productId: string) => {
     console.error("Failed to delete product from Firestore:", error);
   }
 };
+
+// Firestore helper: Delete order
+export const deleteOrderFromFirestore = async (orderId: string) => {
+  try {
+    const orderRef = doc(db, "orders", orderId);
+    await deleteDoc(orderRef);
+  } catch (error) {
+    console.error("Failed to delete order from Firestore:", error);
+  }
+};
+

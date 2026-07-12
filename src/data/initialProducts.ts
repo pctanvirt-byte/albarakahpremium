@@ -464,5 +464,81 @@ export const initialProducts: Product[] = [
     discountBadge: 'শতভাগ বিশুদ্ধ',
     sizeOrVolume: ['১৫ গ্রাম', '৩০ গ্রাম'],
     notes: 'Sourced from Altay Mountains at 16,000 ft altitude'
+  },
+  {
+    id: 'watch-royal-gold',
+    name: 'Al-Barakah Royal Gold Watch',
+    nameTrans: {
+      bn: 'আল-বারাকাহ রয়্যাল গোল্ড হাত ঘড়ি',
+      en: 'Al-Barakah Royal Gold Watch'
+    },
+    description: 'Sophisticated gold-plated wrist watch designed for luxury and durability. Features an exquisite dial and automatic quartz movement.',
+    descriptionTrans: {
+      bn: 'অভিজাত সোনালি প্রলেপযুক্ত প্রিমিয়াম হাত ঘড়ি। আকর্ষণীয় ডায়াল এবং নিখুঁত জাপান কোয়ার্টজ মুভমেন্টের সমন্বয়ে তৈরি যা দীর্ঘস্থায়ী ও রাজকীয় আভিজাত্য প্রকাশ করে।',
+      en: 'Sophisticated gold-plated wrist watch designed for luxury and durability. Features an exquisite dial and automatic quartz movement.'
+    },
+    price: 4500,
+    discountPrice: 3800,
+    images: [
+      'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=600'
+    ],
+    category: 'watches',
+    stock: 12,
+    rating: 5.0,
+    reviewsCount: 24,
+    isBestSeller: true,
+    discountBadge: 'লাক্সারি কালেকশন',
+    sizeOrVolume: ['Standard Adjustable'],
+    notes: 'Premium Gold Finish, Japan Quartz Movement, Water Resistant'
+  },
+  {
+    id: 'watch-luxury-leather',
+    name: 'Kurren Luxury Leather Watch',
+    nameTrans: {
+      bn: 'কুরেন লাক্সারি লেদার হাত ঘড়ি',
+      en: 'Kurren Luxury Leather Watch'
+    },
+    description: 'Classic genuine leather strap watch with a minimal design. Perfectly complements both formal and casual attire.',
+    descriptionTrans: {
+      bn: 'খাঁটি চামড়ার বেল্ট সমৃদ্ধ ক্লাসিক ও মিনিমাল ডিজাইনের হাত ঘড়ি। ফরমাল এবং ক্যাজুয়াল সব ধরনের পোশাকের সাথেই চমৎকার মানানসই ও ব্যবহারকারীকে দেয় স্মার্ট লুক।',
+      en: 'Classic genuine leather strap watch with a minimal design. Perfectly complements both formal and casual attire.'
+    },
+    price: 2200,
+    discountPrice: 1750,
+    images: [
+      'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=600'
+    ],
+    category: 'watches',
+    stock: 20,
+    rating: 4.8,
+    reviewsCount: 16,
+    discountBadge: 'বিশেষ অফার',
+    sizeOrVolume: ['Standard Fit'],
+    notes: 'Genuine Leather Strap, Classic Dial, Scratch Resistant'
+  },
+  {
+    id: 'watch-silver-chronograph',
+    name: 'Royal Chronograph Silver Watch',
+    nameTrans: {
+      bn: 'রয়্যাল ক্রোনোগ্রাফ সিলভার হাত ঘড়ি',
+      en: 'Royal Chronograph Silver Watch'
+    },
+    description: 'Premium silver stainless steel chronograph watch. Built with ultimate craftsmanship for an outstanding aesthetic.',
+    descriptionTrans: {
+      bn: 'স্টেইনলেস স্টিলের গর্জিয়াস ক্রোনোগ্রাফ সিলভার হাত ঘড়ি। আভিজাত্যপূর্ণ ডিজাইনের এই ঘড়িটি দৈনন্দিন ব্যবহারের জন্য চমৎকার এবং আভিজাত্য ফুটিয়ে তোলে।',
+      en: 'Premium silver stainless steel chronograph watch. Built with ultimate craftsmanship for an outstanding aesthetic.'
+    },
+    price: 3500,
+    discountPrice: 2950,
+    images: [
+      'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&q=80&w=600'
+    ],
+    category: 'watches',
+    stock: 15,
+    rating: 4.9,
+    reviewsCount: 32,
+    discountBadge: 'জনপ্রিয়',
+    sizeOrVolume: ['Standard Adjustable'],
+    notes: 'Stainless Steel Band, Chronograph Dial, Luminous Hands'
   }
 ];
