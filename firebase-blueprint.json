@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information, shipping details, and saved wishlist.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique Firebase UID for the user." },
+        "name": { "type": "string", "description": "Full name of the user." },
+        "phone": { "type": "string", "description": "Phone number of the user in Bangladesh." },
+        "email": { "type": "string", "description": "Email address of the user." },
+        "address": { "type": "string", "description": "Default shipping address of the user." },
+        "avatar": { "type": "string", "description": "Profile picture URL." },
+        "role": { "type": "string", "enum": ["customer", "admin"], "description": "Roles in the application." },
+        "wishlistProductIds": { "type": "array", "description": "Array of product IDs in user's wishlist." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of account creation." },
+        "lastLogin": { "type": "string", "format": "date-time", "description": "ISO timestamp of last sign-in." }
+      },
+      "required": ["id", "name", "role"]
+    },
+    "Product": {
+      "title": "Al Barakah Product",
+      "description": "Premium brand item information.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique product ID." },
+        "name": { "type": "string", "description": "Product name in English." },
+        "category": { "type": "string", "description": "Category of the product." },
+        "price": { "type": "number", "description": "Price in BDT." },
+        "rating": { "type": "number", "description": "User rating of the product." },
+        "reviewsCount": { "type": "number", "description": "Number of product reviews." },
+        "isBestSeller": { "type": "boolean", "description": "Whether the product is a featured best seller." }
+      },
+      "required": ["id", "name", "category", "price"]
+    },
+    "Order": {
+      "title": "Customer Order",
+      "description": "Receipt details including purchased items, delivery, payment details, and courier tracking.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique order ID." },
+        "userId": { "type": "string", "description": "UID of the user who placed this order." },
+        "customerName": { "type": "string", "description": "Recipient name." },
+        "phone": { "type": "string", "description": "Recipient phone number." },
+        "address": { "type": "string", "description": "Shipping destination address." },
+        "area": { "type": "string", "enum": ["inside_dhaka", "outside_dhaka"], "description": "Shipping destination area." },
+        "paymentMethod": { "type": "string", "enum": ["bkash", "nagad", "rocket", "bank", "cod"], "description": "Method of payment." },
+        "paymentNumber": { "type": "string", "description": "Sender payment account number." },
+        "transactionId": { "type": "string", "description": "Payment platform transaction ID." },
+        "subtotal": { "type": "number", "description": "Total price of items before shipping." },
+        "deliveryCharge": { "type": "number", "description": "Shipping cost in BDT." },
+        "total": { "type": "number", "description": "Final bill to collect." },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "shipped", "delivered", "cancelled"], "description": "Status of order shipment processing." },
+        "courier": { "type": "string", "enum": ["pathao", "steadfast", "none"], "description": "Partner courier selection." },
+        "courierTrackingId": { "type": "string", "description": "Consignment tracking ID." },
+        "courierStatus": { "type": "string", "description": "Status log from the courier platform." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of order placement." }
+      },
+      "required": ["id", "customerName", "phone", "address", "total", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user demographic profiles, authentication identities, and preferences."
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Stores current luxury items catalog sync."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Stores historic customer sales transactions and courier tracking logs."
+    }
+  }
+}

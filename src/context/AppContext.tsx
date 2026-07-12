@@ -1,6 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, Order, User, Language, OrderItem } from '../types';
 import { initialProducts } from '../data/initialProducts';
+import { onAuthStateChanged } from 'firebase/auth';
+import { 
+  auth, 
+  loginWithGoogle, 
+  logoutFromFirebase, 
+  syncUserProfile, 
+  saveOrderToFirestore,
+  fetchUserOrdersFromFirestore,
+  fetchAllOrdersFromFirestore,
+  syncProductsToFirestore,
+  saveProductToFirestore,
+  deleteProductFromFirestore
+} from '../lib/firebase';
 
 interface AppContextType {
   products: Product[];
@@ -43,6 +56,7 @@ interface AppContextType {
   
   // Authentication
   loginOrRegister: (name: string, phone: string, email?: string, address?: string) => User;
+  loginWithGoogleAuth: () => Promise<User | null>;
   logoutUser: () => void;
   
   // Language & Navigation
@@ -53,6 +67,10 @@ interface AppContextType {
   
   // Admin Operations
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
+  updateOrderCourier: (orderId: string, courier: 'pathao' | 'steadfast' | 'none', trackingId?: string, courierStatus?: string) => void;
+  deleteOrder: (orderId: string) => void;
+  deleteUser: (userId: string) => void;
+  resetStoreData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -100,6 +118,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return sessionStorage.getItem('al_barakah_admin') === 'true';
   });
 
+  // Listen to Firebase Auth changes to auto-login
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Sync profile to Firestore and fetch their data
+        const profile = await syncUserProfile(firebaseUser);
+        if (profile) {
+          // Map Firebase properties to the App's User structure
+          const appUser: User = {
+            id: profile.id,
+            name: profile.name,
+            phone: profile.phone,
+            email: profile.email,
+            address: profile.address,
+            createdAt: profile.createdAt,
+            wishlistProductIds: profile.wishlistProductIds
+          };
+          setCurrentUser(appUser);
+          
+          // Also fetch user's orders from Firestore
+          const firestoreOrders = await fetchUserOrdersFromFirestore(firebaseUser.uid);
+          if (firestoreOrders.length > 0) {
+            setOrders(prev => {
+              const merged = [...prev];
+              firestoreOrders.forEach(o => {
+                if (!merged.some(m => m.id === o.id)) {
+                  merged.push(o as Order);
+                }
+              });
+              return merged;
+            });
+          }
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Sync products with Firestore on first load
+  useEffect(() => {
+    const syncProducts = async () => {
+      const dbProducts = await syncProductsToFirestore(initialProducts);
+      if (dbProducts && dbProducts.length > 0) {
+        setProducts(dbProducts as Product[]);
+      }
+    };
+    syncProducts();
+  }, []);
+
   // Keep localStorage in sync
   useEffect(() => {
     localStorage.setItem('al_barakah_products', JSON.stringify(products));
@@ -129,6 +196,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser]);
 
+  // Synchronize wishlist changes into logged-in user profile
+  useEffect(() => {
+    if (currentUser) {
+      const currentIds = currentUser.wishlistProductIds || [];
+      const wishlistIds = wishlist.map((p) => p.id);
+      const hasChanged = 
+        currentIds.length !== wishlistIds.length ||
+        wishlistIds.some(id => !currentIds.includes(id));
+      
+      if (hasChanged) {
+        const updatedUser = { ...currentUser, wishlistProductIds: wishlistIds };
+        setCurrentUser(updatedUser);
+        setUsersList((prevList) =>
+          prevList.map((u) => (u.id === currentUser.id ? updatedUser : u))
+        );
+      }
+    }
+  }, [wishlist]);
+
+  // Load saved user wishlist when user logs in
+  useEffect(() => {
+    if (currentUser) {
+      const userWishlistIds = currentUser.wishlistProductIds || [];
+      const resolvedWishlist = products.filter(p => userWishlistIds.includes(p.id));
+      
+      if (userWishlistIds.length > 0) {
+        setWishlist((prev) => {
+          // Merge guest wishlist with user saved wishlist
+          const merged = [...prev];
+          resolvedWishlist.forEach((p) => {
+            if (!merged.some((m) => m.id === p.id)) {
+              merged.push(p);
+            }
+          });
+          return merged;
+        });
+      }
+    }
+  }, [currentUser?.id]);
+
   useEffect(() => {
     localStorage.setItem('al_barakah_lang', currentLanguage);
   }, [currentLanguage]);
@@ -148,6 +255,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reviewsCount: 0
     };
     setProducts((prev) => [newProduct, ...prev]);
+    saveProductToFirestore(newProduct);
   };
 
   const updateProduct = (updated: Product) => {
@@ -155,6 +263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (selectedProduct?.id === updated.id) {
       setSelectedProduct(updated);
     }
+    saveProductToFirestore(updated);
   };
 
   const deleteProduct = (id: string) => {
@@ -164,6 +273,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (selectedProduct?.id === id) {
       setSelectedProduct(null);
     }
+    deleteProductFromFirestore(id);
   };
 
   // 🔷 CART OPERATIONS
@@ -278,6 +388,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Save Order
     setOrders((prev) => [newOrder, ...prev]);
 
+    // Save Order to Firestore
+    saveOrderToFirestore(newOrder);
+
     // Save customer if logged in, add order to history if applicable
     if (currentUser) {
       // User details updated
@@ -286,6 +399,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUsersList((prevList) =>
         prevList.map((u) => (u.id === currentUser.id ? updatedUser : u))
       );
+      if (auth.currentUser) {
+        syncUserProfile(auth.currentUser, updatedUser);
+      }
     } else {
       // Auto register non-logged in users
       loginOrRegister(orderData.customerName, orderData.phone, orderData.email, orderData.address);
@@ -324,7 +440,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logoutUser = () => {
+    logoutFromFirebase();
     setCurrentUser(null);
+    setWishlist([]);
+  };
+
+  // Google Login Auth method
+  const loginWithGoogleAuth = async () => {
+    try {
+      const fbUser = await loginWithGoogle();
+      if (fbUser) {
+        const profile = await syncUserProfile(fbUser, { wishlistProductIds: wishlist.map(p => p.id) });
+        if (profile) {
+          const appUser: User = {
+            id: profile.id,
+            name: profile.name,
+            phone: profile.phone,
+            email: profile.email,
+            address: profile.address,
+            createdAt: profile.createdAt,
+            wishlistProductIds: profile.wishlistProductIds
+          };
+          setCurrentUser(appUser);
+          setUsersList(prev => {
+            if (prev.some(u => u.id === appUser.id)) {
+              return prev.map(u => u.id === appUser.id ? appUser : u);
+            }
+            return [...prev, appUser];
+          });
+          return appUser;
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error("Google Sign In flow failed", err);
+      return null;
+    }
   };
 
   // 🔷 ADMIN SESSION
@@ -341,6 +492,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders((prev) =>
       prev.map((ord) => (ord.id === orderId ? { ...ord, status } : ord))
     );
+  };
+
+  const updateOrderCourier = (
+    orderId: string,
+    courier: 'pathao' | 'steadfast' | 'none',
+    trackingId?: string,
+    courierStatus?: string
+  ) => {
+    setOrders((prev) =>
+      prev.map((ord) => {
+        if (ord.id === orderId) {
+          if (courier === 'none') {
+            const { courier: _, courierTrackingId: __, courierStatus: ___, ...rest } = ord;
+            return rest as Order;
+          }
+          return {
+            ...ord,
+            courier,
+            courierTrackingId: trackingId,
+            courierStatus: courierStatus || 'Consignment Created'
+          } as Order;
+        }
+        return ord;
+      })
+    );
+  };
+
+  const deleteOrder = (orderId: string) => {
+    setOrders((prev) => prev.filter((ord) => ord.id !== orderId));
+  };
+
+  const deleteUser = (userId: string) => {
+    setUsersList((prev) => prev.filter((u) => u.id !== userId));
+    if (currentUser?.id === userId) {
+      setCurrentUser(null);
+    }
+  };
+
+  const resetStoreData = () => {
+    if (window.confirm(currentLanguage === 'bn' ? 'আপনি কি নিশ্চিত যে আপনি সমস্ত স্টোর ডেটা রিসেট করতে চান?' : 'Are you sure you want to reset all store data to factory defaults?')) {
+      setProducts(initialProducts);
+      setOrders([]);
+      setUsersList([]);
+      setCurrentUser(null);
+      setCart([]);
+      setWishlist([]);
+      sessionStorage.removeItem('al_barakah_admin');
+      setAdminLoggedIn(false);
+      setCurrentPageState('home');
+    }
   };
 
   const setLanguage = (lang: Language) => {
@@ -376,6 +577,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         placeOrder,
         
         loginOrRegister,
+        loginWithGoogleAuth,
         logoutUser,
         
         setLanguage,
@@ -383,7 +585,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedProduct,
         setAdminLoggedIn: setAdminLogged,
         
-        updateOrderStatus
+        updateOrderStatus,
+        updateOrderCourier,
+        deleteOrder,
+        deleteUser,
+        resetStoreData
       }}
     >
       {children}

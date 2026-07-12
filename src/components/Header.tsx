@@ -11,7 +11,8 @@ import {
   Globe, 
   LogOut, 
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -85,6 +86,8 @@ export const Header: React.FC = () => {
   const navItems = [
     { id: 'home', label: { bn: 'হোম', en: 'Home' } },
     { id: 'shop', label: { bn: 'শপ / প্রোডাক্টস', en: 'Shop' } },
+    { id: 'ai-studio', label: { bn: 'এআই স্টুডিও ✨', en: 'AI Studio ✨' } },
+    { id: 'gmail', label: { bn: 'জিমেইল সেন্টার', en: 'Gmail Center' } },
     { id: 'about', label: { bn: 'আমাদের সম্পর্কে', en: 'About Us' } },
     { id: 'contact', label: { bn: 'যোগাযোগ', en: 'Contact' } },
     { id: 'privacy', label: { bn: 'প্রাইভেসি পলিসি', en: 'Privacy Policy' } },
@@ -128,18 +131,24 @@ export const Header: React.FC = () => {
                 {item.label[currentLanguage]}
               </button>
             ))}
-            {adminLoggedIn && (
-              <button
-                onClick={() => setCurrentPage('admin')}
-                className={`px-4 py-2 text-sm font-semibold tracking-wide text-amber-500 flex items-center gap-1.5 transition-colors border border-amber-500/20 rounded bg-amber-500/5 hover:bg-amber-500/10 ${
-                  currentPage === 'admin' ? 'bg-amber-500/20 border-amber-500' : ''
-                }`}
-                id="nav-item-admin-shortcut"
-              >
-                <ShieldAlert size={14} />
-                {currentLanguage === 'bn' ? 'অ্যাডমিন' : 'Admin'}
-              </button>
-            )}
+            <button
+              onClick={() => setCurrentPage('admin')}
+              className={`px-4 py-2 text-sm font-semibold tracking-wide flex items-center gap-1.5 transition-colors border rounded ${
+                currentPage === 'admin' 
+                  ? 'text-amber-500 bg-amber-500/20 border-amber-500' 
+                  : adminLoggedIn
+                    ? 'text-amber-500 border-amber-500/25 bg-amber-500/5 hover:bg-amber-500/10'
+                    : 'text-zinc-400 border-zinc-900 hover:text-amber-500 hover:border-amber-500/35 hover:bg-zinc-900/10'
+              }`}
+              id="nav-item-admin-shortcut"
+            >
+              {adminLoggedIn ? <ShieldAlert size={14} className="text-amber-500" /> : <Lock size={13} className="text-zinc-500" />}
+              <span>
+                {adminLoggedIn 
+                  ? (currentLanguage === 'bn' ? 'অ্যাডমিন' : 'Admin') 
+                  : (currentLanguage === 'bn' ? 'অ্যাডমিন লগইন' : 'Admin Login')}
+              </span>
+            </button>
           </nav>
 
           {/* Search, Cart, User controls */}
@@ -217,7 +226,7 @@ export const Header: React.FC = () => {
 
             {/* Wishlist */}
             <button
-              onClick={() => setCurrentPage('user-dashboard')}
+              onClick={() => setCurrentPage('wishlist')}
               className="relative p-2 text-zinc-300 hover:text-amber-500 transition-colors"
               title="Wishlist"
               id="btn-wishlist-indicator"
@@ -377,19 +386,44 @@ export const Header: React.FC = () => {
                   {item.label[currentLanguage]}
                 </button>
               ))}
-              {adminLoggedIn && (
-                <button
-                  onClick={() => {
-                    setCurrentPage('admin');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-4 py-3 text-sm font-bold text-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/10 rounded flex items-center gap-2"
-                  id="mobile-nav-item-admin"
-                >
-                  <ShieldAlert size={14} />
-                  {currentLanguage === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin Dashboard'}
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  setCurrentPage('wishlist');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-4 py-3 text-sm font-medium rounded flex items-center gap-2 ${
+                  currentPage === 'wishlist'
+                    ? 'text-amber-500 bg-zinc-900'
+                    : 'text-zinc-300 hover:text-amber-400 hover:bg-zinc-900/40'
+                }`}
+                id="mobile-nav-item-wishlist"
+              >
+                <Heart size={14} className={currentPage === 'wishlist' ? 'text-amber-500' : 'text-zinc-400'} />
+                <span>
+                  {currentLanguage === 'bn' ? `পছন্দের তালিকা (${wishlist.length})` : `My Wishlist (${wishlist.length})`}
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  setCurrentPage('admin');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-4 py-3 text-sm font-bold rounded flex items-center gap-2 border ${
+                  currentPage === 'admin'
+                    ? 'text-amber-500 bg-amber-500/10 border-amber-500'
+                    : adminLoggedIn
+                      ? 'text-amber-500 bg-amber-500/5 border-amber-500/10 hover:bg-amber-500/15'
+                      : 'text-zinc-400 bg-zinc-900/30 border-zinc-900/60 hover:text-amber-500 hover:border-amber-500/20'
+                }`}
+                id="mobile-nav-item-admin"
+              >
+                {adminLoggedIn ? <ShieldAlert size={14} className="text-amber-500" /> : <Lock size={13} className="text-zinc-500" />}
+                <span>
+                  {adminLoggedIn 
+                    ? (currentLanguage === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin Dashboard') 
+                    : (currentLanguage === 'bn' ? 'অ্যাডমিন লগইন' : 'Admin Login')}
+                </span>
+              </button>
               {currentUser && (
                 <div className="pt-4 border-t border-zinc-900 flex items-center justify-between px-4">
                   <span className="text-xs text-zinc-400 font-medium">

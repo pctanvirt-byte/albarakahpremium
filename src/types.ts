@@ -53,6 +53,9 @@ export interface Order {
   deliveryCharge: number;
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  courier?: 'pathao' | 'steadfast';
+  courierTrackingId?: string;
+  courierStatus?: string;
   createdAt: string;
 }
 
@@ -63,6 +66,7 @@ export interface User {
   name: string;
   address?: string;
   createdAt: string;
+  wishlistProductIds?: string[];
 }
 
 export type Language = 'bn' | 'en';

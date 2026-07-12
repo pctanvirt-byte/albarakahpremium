@@ -14,6 +14,9 @@ import { Contact } from './pages/Contact';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { UserDashboard } from './pages/UserDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { GmailCenter } from './pages/GmailCenter';
+import { Wishlist } from './pages/Wishlist';
+import { AIScentStudio } from './pages/AIScentStudio';
 
 // Page content switcher based on selected state
 const AppContent: React.FC = () => {
@@ -30,10 +33,17 @@ const AppContent: React.FC = () => {
         return <Home />;
       case 'shop':
         return <Shop />;
+      case 'gmail':
+        return <GmailCenter />;
+      case 'ai-studio':
+      case 'ai-scent-studio':
+        return <AIScentStudio />;
       case 'product-details':
         return <ProductDetails />;
       case 'cart':
         return <Cart />;
+      case 'wishlist':
+        return <Wishlist />;
       case 'checkout':
         return <Checkout />;
       case 'about':
