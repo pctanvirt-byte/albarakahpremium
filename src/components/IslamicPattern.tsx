@@ -86,10 +86,33 @@ export const IslamicLogo: React.FC<{ size?: number; className?: string }> = ({ s
           </textPath>
         </text>
 
-        {/* Center monogram: Clean space inside the geometric frame */}
+        {/* Center monogram: Fully proportional, multi-layered 8-pointed star */}
         <g fill="url(#gold-grad)" stroke="none">
-          {/* A small elegant gold 8-pointed star accent at the absolute center */}
-          <path d="M 50 45 L 51.5 48.5 L 55 50 L 51.5 51.5 L 50 55 L 48.5 51.5 L 45 50 L 48.5 48.5 Z" />
+          {/* Layer 1: Outer Elegant 8-pointed star (Rub El Hizb) */}
+          <rect x="35" y="35" width="30" height="30" fill="url(#gold-grad)" stroke="none" transform="rotate(0 50 50)" />
+          <rect x="35" y="35" width="30" height="30" fill="url(#gold-grad)" stroke="none" transform="rotate(45 50 50)" />
+          
+          {/* Layer 2: Inner contrast border */}
+          <rect x="37" y="37" width="26" height="26" fill="#000000" stroke="none" transform="rotate(0 50 50)" />
+          <rect x="37" y="37" width="26" height="26" fill="#000000" stroke="none" transform="rotate(45 50 50)" />
+          
+          {/* Layer 3: Innermost gold star (offset by 22.5 deg for star contrast) */}
+          <rect x="39.5" y="39.5" width="21" height="21" fill="url(#gold-grad)" stroke="none" transform="rotate(22.5 50 50)" />
+          <rect x="39.5" y="39.5" width="21" height="21" fill="url(#gold-grad)" stroke="none" transform="rotate(67.5 50 50)" />
+          
+          {/* Center core: A beautiful delicate gold circle with a sparkling center */}
+          <circle cx="50" cy="50" r="5.5" fill="#000000" stroke="url(#gold-grad)" strokeWidth="0.75" />
+          <circle cx="50" cy="50" r="2" fill="url(#gold-grad)" />
+          
+          {/* Eight miniature gold dots around the outer tips of the star to fill space proportionally */}
+          <circle cx="50" cy="23" r="1" fill="url(#gold-grad)" />
+          <circle cx="50" cy="77" r="1" fill="url(#gold-grad)" />
+          <circle cx="23" cy="50" r="1" fill="url(#gold-grad)" />
+          <circle cx="77" cy="50" r="1" fill="url(#gold-grad)" />
+          <circle cx="31" cy="31" r="1" fill="url(#gold-grad)" />
+          <circle cx="69" cy="69" r="1" fill="url(#gold-grad)" />
+          <circle cx="31" cy="69" r="1" fill="url(#gold-grad)" />
+          <circle cx="69" cy="31" r="1" fill="url(#gold-grad)" />
         </g>
       </svg>
     </div>
